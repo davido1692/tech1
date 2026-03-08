@@ -10,7 +10,6 @@ pipeline {
         BACKEND_REPO  = "${ECR_REGISTRY}/devops-challenge-backend"
 
         ECS_CLUSTER = 'devops-challenge-cluster'
-'
         ECS_FRONTEND_SERVICE = 'devops-challenge-frontend-service'
         ECS_BACKEND_SERVICE  = 'devops-challenge-backend-service'
     }
