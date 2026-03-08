@@ -1,4 +1,14 @@
-node_modules/
-.terraform/
+# Terraform
+**/.terraform/*
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# Optional: keep if secrets are inside
+*.tfvars
+*.tfvars.json
