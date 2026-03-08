@@ -2,12 +2,17 @@ pipeline {
     agent any
 
     environment {
-        // ====> Replace with your AWS region, e.g., 'us-east-1'
         AWS_REGION = 'us-east-1'
+        AWS_ACCOUNT_ID = '751545121618'
+        ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-        // ====> Replace with your own ECR repository URIs
-        FRONTEND_REPO = '751545121618.dkr.ecr.us-east-1.amazonaws.com/devops-challenge-frontend'
-        BACKEND_REPO  = '751545121618.dkr.ecr.us-east-1.amazonaws.com/devops-challenge-backend'
+        FRONTEND_REPO = "${ECR_REGISTRY}/devops-challenge-frontend"
+        BACKEND_REPO  = "${ECR_REGISTRY}/devops-challenge-backend"
+
+        ECS_CLUSTER = 'devops-challenge-cluster'
+'
+        ECS_FRONTEND_SERVICE = 'devops-challenge-frontend-service'
+        ECS_BACKEND_SERVICE  = 'devops-challenge-backend-service'
     }
 
     stages {
@@ -28,12 +33,11 @@ pipeline {
 
         stage('Authenticate to ECR') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS Credentials']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     script {
                         sh '''
                             aws --version
-                            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $FRONTEND_REPO
-                            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $BACKEND_REPO
+                            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
                         '''
                     }
                 }
@@ -56,11 +60,11 @@ pipeline {
 
         stage('Update ECS services') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS Credentials']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     script {
                         sh '''
-                            aws ecs update-service --cluster your-ecs-cluster-name --service your-frontend-service-name --force-new-deployment --region $AWS_REGION
-                            aws ecs update-service --cluster your-ecs-cluster-name --service your-backend-service-name --force-new-deployment --region $AWS_REGION
+                            aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_FRONTEND_SERVICE --force-new-deployment --region $AWS_REGION
+                            aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_BACKEND_SERVICE --force-new-deployment --region $AWS_REGION
                         '''
                     }
                 }
